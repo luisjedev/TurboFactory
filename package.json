@@ -1,5 +1,5 @@
 {
-  "name": "app-factory-tb",
+  "name": "turbo-factory",
   "private": true,
   "scripts": {
     "build": "turbo run build",

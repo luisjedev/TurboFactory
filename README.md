@@ -1,4 +1,4 @@
-# App Factory
+# TurboFactory
 
 ![Turborepo](https://img.shields.io/badge/Turborepo-2.x-black)
 ![pnpm](https://img.shields.io/badge/pnpm-11-orange)
@@ -7,7 +7,7 @@
 ![StyleX](https://img.shields.io/badge/StyleX-design%20system-ff69b4)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
-**Una fábrica de aplicaciones en un solo monorepo.** App Factory es un [Turborepo](https://turborepo.dev) para crear y hacer evolucionar varias apps a la vez sin reinventar la base en cada una: paquetes comunes, un sistema de diseño compartido y un flujo de trabajo interno de specs, issues y tareas gobernado por skills para agentes de IA.
+**Una fábrica de aplicaciones en un solo monorepo.** TurboFactory es un [Turborepo](https://turborepo.dev) para crear y hacer evolucionar varias apps a la vez sin reinventar la base en cada una: paquetes comunes, un sistema de diseño compartido y un flujo de trabajo interno de specs, issues y tareas gobernado por skills para agentes de IA.
 
 La idea es sencilla: cada aplicación nueva nace sobre la misma cimentación (TypeScript estricto, React, StyleX, lint y tipos compartidos) y el trabajo se planifica, implementa, revisa y cierra dentro del propio repo, con las issues en Markdown como fuente de verdad.
 
