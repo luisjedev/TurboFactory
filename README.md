@@ -1,49 +1,75 @@
 # App Factory
 
-Monorepo basado en Turborepo para crear y evolucionar aplicaciones con una base común de TypeScript, React, StyleX, calidad y accesibilidad.
+![Turborepo](https://img.shields.io/badge/Turborepo-2.x-black)
+![pnpm](https://img.shields.io/badge/pnpm-11-orange)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![StyleX](https://img.shields.io/badge/StyleX-design%20system-ff69b4)
+![License: MIT](https://img.shields.io/badge/License-MIT-green)
+
+**Una fábrica de aplicaciones en un solo monorepo.** App Factory es un [Turborepo](https://turborepo.dev) para crear y hacer evolucionar varias apps a la vez sin reinventar la base en cada una: paquetes comunes, un sistema de diseño compartido y un flujo de trabajo interno de specs, issues y tareas gobernado por skills para agentes de IA.
+
+La idea es sencilla: cada aplicación nueva nace sobre la misma cimentación (TypeScript estricto, React, StyleX, lint y tipos compartidos) y el trabajo se planifica, implementa, revisa y cierra dentro del propio repo, con las issues en Markdown como fuente de verdad.
+
+## Cómo funciona
+
+```text
+Spec / plan ──> Issues en Markdown ──> Skills de IA ──> Código
+ (plans/)      (backlog → in-progress   (.agents/skills)  (apps/)
+                → in-review → done)          │
+                                             └── consume ──> packages/*
+                                                           (UI, StyleX, configs)
+```
+
+1. **Se planea.** Las specs y planes viven en `apps/issues-tracker/plans/` y se trocean en issues.
+2. **Se trabaja con issues versionadas.** Cada issue es un archivo Markdown en `apps/issues-tracker/issues/` que se mueve entre `backlog`, `in-progress`, `in-review` y `done`.
+3. **Las skills gobiernan el flujo.** En `.agents/skills/` hay skills para crear issues, planificar, implementar, revisar código y cerrar trabajo. Cualquier agente compatible las descubre y las aplica.
+4. **Las apps consumen paquetes, no se copian entre sí.** Todo lo reutilizable vive en `packages/` con API pública; ninguna app importa archivos internos de otra.
 
 ## Aplicaciones
 
-- [`apps/dashboard`](apps/dashboard): entrada local a App Factory y punto de acceso a sus aplicaciones nativas.
-- [`apps/ui-catalog`](apps/ui-catalog): catálogo visual de la interfaz pública de `@repo/ui`, disponible en el puerto `3001`.
-- [`apps/issues-tracker`](apps/issues-tracker): tablero de consulta para las issues y planes Markdown, disponible en el puerto `3002`.
+| App | Stack | Puerto | Qué es |
+|---|---|---|---|
+| [`dashboard`](apps/dashboard) | Next.js (App Router) | 3000 | Puerta de entrada local a la fábrica y a sus aplicaciones |
+| [`ui-catalog`](apps/ui-catalog) | Vite + React | 3001 | Catálogo visual del sistema de diseño `@repo/ui` |
+| [`issues-tracker`](apps/issues-tracker) | Vite + React | 3002 | Tablero que lee las issues y planes en Markdown del repo |
 
-Cada aplicación ejecutable debe poder desarrollarse, comprobarse, compilarse y desplegarse de forma independiente.
+Cada aplicación se puede desarrollar, comprobar, compilar y desplegar de forma independiente.
 
-## Paquetes compartidos
+## Sistema de diseño y paquetes compartidos
 
-- [`@repo/ui`](packages/ui): componentes, tokens, temas y reset visual compartidos.
-- [`@repo/stylex-config`](packages/stylex-config): adaptadores de compilación StyleX para Next.js y Vite.
-- [`@repo/eslint-config`](packages/eslint-config): presets comunes de ESLint.
-- [`@repo/typescript-config`](packages/typescript-config): presets estrictos de TypeScript.
+| Paquete | Contenido |
+|---|---|
+| [`@repo/ui`](packages/ui) | Componentes (Button, Card, Dialog, Input, Badge, Alert…), tokens, temas y reset con StyleX |
+| [`@repo/stylex-config`](packages/stylex-config) | Adaptadores de compilación StyleX para Next.js (Babel/PostCSS) y Vite |
+| [`@repo/eslint-config`](packages/eslint-config) | Presets comunes de ESLint para cada tipo de workspace |
+| [`@repo/typescript-config`](packages/typescript-config) | Presets estrictos de TypeScript (base, Next.js, Vite, librerías React) |
 
-Las aplicaciones consumen únicamente las interfaces públicas de estos paquetes. No deben importar archivos internos de otra aplicación.
+Las apps no duplican opciones del compilador ni rutas internas de los paquetes: consumen solo sus interfaces públicas.
 
 ## Requisitos
 
-- Node.js `>=24.11.0 <25` (consulta [`.nvmrc`](.nvmrc)).
-- pnpm `11.24.0`.
+- Node.js `>=24.11.0 <25` (ver [`.nvmrc`](.nvmrc))
+- pnpm `11.24.0` (el repo usa exclusivamente pnpm)
 
 ```bash
 pnpm install
 ```
 
-El repositorio usa exclusivamente pnpm.
-
 ## Desarrollo
 
-Desde la raíz:
+Todo el monorepo a la vez:
 
 ```bash
 pnpm dev
 ```
 
-Para trabajar en una sola aplicación:
+O una sola aplicación:
 
 ```bash
-pnpm --filter dashboard dev
-pnpm --filter ui-catalog dev
-pnpm --filter issues-tracker dev
+pnpm --filter dashboard dev       # http://localhost:3000
+pnpm --filter ui-catalog dev      # http://localhost:3001
+pnpm --filter issues-tracker dev  # http://localhost:3002
 ```
 
 ## Verificación
@@ -54,27 +80,16 @@ pnpm check-types
 pnpm build
 ```
 
-Turbo ejecuta cada tarea únicamente en los workspaces que la declaran y respeta sus dependencias internas.
+Turbo ejecuta cada tarea solo en los workspaces que la declaran, respetando las dependencias entre paquetes y con caché de tareas.
 
-## StyleX
+## Añadir una aplicación nueva
 
-La configuración común vive en `@repo/stylex-config`:
+1. Crea la carpeta en `apps/<nombre>` consumiendo `@repo/ui`, `@repo/stylex-config`, `@repo/eslint-config` y `@repo/typescript-config`.
+2. Escribe su spec en `apps/issues-tracker/plans/` y deriva las issues.
+3. Deja que las skills de `.agents/skills/` gobiernen implementación, revisión y cierre.
 
-- Next.js consume los adaptadores `babel` y `postcss`.
-- Vite consume el adaptador `vite`.
-- PostCSS descubre automáticamente el código de la aplicación y sus dependencias directas que publican fuente StyleX.
-- Los paquetes compartidos que escriben StyleX deben declarar `@stylexjs/stylex` y publicar su `package.json` para permitir ese descubrimiento.
+Las reglas completas de trabajo del monorepo (arquitectura, límites entre apps, calidad) están en [`AGENTS.md`](AGENTS.md).
 
-Las aplicaciones no deben duplicar opciones del compilador, capas CSS ni rutas físicas internas de paquetes compartidos.
+## Licencia
 
-## Gestión local del trabajo
-
-La fuente de verdad está versionada dentro de `apps/issues-tracker`:
-
-- `issues/backlog`
-- `issues/in-progress`
-- `issues/in-review`
-- `issues/done`
-- `plans`
-
-Las skills locales de `.agents/skills` gobiernan la creación, implementación, revisión y cierre de trabajo.
+[MIT](LICENSE) — Copyright (c) 2026 luisjedev
